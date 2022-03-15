@@ -13,52 +13,65 @@ public class Player : MonoBehaviour
     public float x;
     public float y;
     [Space(10)]
-    public int jump;
+    public float JumpForce = 10;
+    public float Gravity = -9.81f;
+    public float GravityScale = 1;
+    float Velocity;
+    public bool IsGrounded = false;
+    public float DistToCheck = 0.5f;
 
     void Update()
     {
         x = Input.GetAxis("Horizontal");
         y = Input.GetAxis("Vertical");
 
-        rb.AddForce(transform.up * Input.GetAxis("Jump") * 5000, ForceMode.Impulse);
+        if(Physics.Raycast(transform.position, Vector3.down, DistToCheck))
+            IsGrounded = true;
+        else
+            IsGrounded=false;
+
+        if (!IsGrounded)
+            Velocity += Gravity * GravityScale * Time.deltaTime;
+
+        if (Input.GetAxis("Jump") > 0 && IsGrounded)
+            Velocity = JumpForce;
+
+        transform.Translate(new Vector3(0, Velocity, 0)*Time.deltaTime);
     }
 
     private void FixedUpdate()
     {
-        rb.velocity = new Vector3(5*x, -10, 0);
+        rb.velocity = new Vector3(5*x, 0, 0);
+        if (y < 0)
+        {
+            GameObject.transform.localScale = Vector3.Lerp(GameObject.transform.localScale, new Vector3(1.5f, 0.5f, 1), 0.1f);
+            DistToCheck = 0.25f;
+            GravityScale = 0.9f;
+        }
+        else if (y == 0)
+        {
+            GameObject.transform.localScale = Vector3.Lerp(GameObject.transform.localScale, new Vector3(1, 1, 1), 0.1f);
+            DistToCheck = 0.5f;
+            GravityScale = 1f;
+        }
+        else
+        {
+            GameObject.transform.localScale = Vector3.Lerp(GameObject.transform.localScale, new Vector3(0.5f, 1.5f, 1), 0.1f);
+            DistToCheck = 0.75f;
+            GravityScale = 1.1f;
+        }
     }
 
-    void OnCollisionEnter2D(Collision2D col)
+    void OnCollisionEnter(Collision col)
     {
         if (col.gameObject.CompareTag("Ground"))
         {
-            jump = 1;
-        }
-        if (col.gameObject.CompareTag("Platform"))
-        {
-            ContactPoint2D contact = col.contacts[0];
-            if (Vector2.Dot(contact.normal, Vector2.up) > 0.5)
-            {
-                transform.parent = col.transform;
-                jump = 1;
-            }
+            Velocity = 0;
+            Debug.Log("ntm");
         }
         if (col.gameObject.CompareTag("Enemy"))
         {
             StartCoroutine(Wait(2));
-        }
-    }
-
-    void OnCollisionExit2D(Collision2D col)
-    {
-        if (col.gameObject.CompareTag("Ground"))
-        {
-            jump = 0;
-        }
-        if (col.gameObject.CompareTag("Platform"))
-        {
-            transform.parent = null;
-            jump = 0;
         }
     }
 
