@@ -259,6 +259,7 @@ MonoBehaviour:
   GravityScale: 1
   IsGrounded: 0
   DistToCheck: 0.5
+  Speed: 2
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0

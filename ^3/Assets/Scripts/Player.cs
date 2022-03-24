@@ -19,6 +19,7 @@ public class Player : MonoBehaviour
     float Velocity;
     public bool IsGrounded = false;
     public float DistToCheck = 0.5f;
+    public float Speed = 2f;
 
     void Update()
     {
@@ -37,11 +38,21 @@ public class Player : MonoBehaviour
             Velocity = JumpForce;
 
         transform.Translate(new Vector3(0, Velocity, 0)*Time.deltaTime);
+
+        if (Speed < 10 && x != 0)
+            Speed *= 1.25f;
+        else if (Speed > 2 && x == 0)
+            Speed *= 0.5f;
+        else if (Speed > 10)
+            Speed = 10f;
+        else if (Speed < 2)
+            Speed = 2f;
     }
 
     private void FixedUpdate()
     {
-        rb.velocity = new Vector3(5*x, 0, 0);
+        Debug.Log(Speed);
+        rb.velocity = new Vector3(Speed*x, 0, 0);
         if (y < 0)
         {
             GameObject.transform.localScale = Vector3.Lerp(GameObject.transform.localScale, new Vector3(1.5f, 0.5f, 1), 0.1f);
